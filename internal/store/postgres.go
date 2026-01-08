@@ -66,3 +66,23 @@ func (s *Store) createTable() error {
 	_, err := s.db.ExecContext(ctx, query)
 	return err
 }
+
+func (s *Store) Save(originalUrl string, shortCode string) (int, error) {
+	query := `
+			INSERT INTO urls (origianl_url, short_code)
+			VALUES ($1, $2)
+			RETURNING id
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var id int
+	err := s.db.QueryRowContext(ctx, query, originalUrl, shortCode).Scan(&id)
+
+	if err != nil {
+		return 0, fmt.Errorf("Erro: falha ao salvar url: %w", err)
+	}
+
+	return id, nil
+}
