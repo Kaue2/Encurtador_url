@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	_ "github.com/jackc/pgx/v5/stdlib" // Driver do Postgres
 )
 
 type Url struct {
@@ -19,18 +21,22 @@ type Store struct {
 }
 
 func NewStore(connString string) (*Store, error) {
+	// Abre a conexão com o banco de dados PostgreSQL
 	db, err := sql.Open("pgx", connString)
 
 	if err != nil {
 		return  nil, fmt.Errorf("Erro: falha ao abrir conexão: %w", err)
 	}
 
+	// Verifica se a conexão está ativa
 	if err := db.Ping(); err != nil {
 		return nil, fmt.Errorf("Erro: falha ao estabelecer conexão: %w", err)
 	}
 
+	// Cria a instância da Store
 	s := &Store{db: db}
 
+	// Cria a tabela de links, se não existir
 	if err := s.createTable(); err != nil {
 		return nil, fmt.Errorf("Erro: falha ao criar a tabela de links: %w", err)
 	}
@@ -52,9 +58,11 @@ func (s *Store) createTable() error {
 	);
 	`
 
+	// Define um contexto com timeout para a execução da query
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	// Executa a query de criação da tabela
 	_, err := s.db.ExecContext(ctx, query)
 	return err
 }
