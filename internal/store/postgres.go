@@ -67,6 +67,30 @@ func (s *Store) createTable() error {
 	return err
 }
 
+func (s *Store) Get(code string) (string, error) {
+	var url string 
+
+	query := `
+			SELECT original_url
+			FROM urls
+			WHERE short_code = $1
+	`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := s.db.QueryRowContext(ctx, query, code).Scan(&url)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", fmt.Errorf("Erro: URL não encontrada: %w", err)
+		}
+		return "", fmt.Errorf("Erro: falha ao buscar pela URL: %w", err)
+	}
+
+	return url, nil
+}
+
 func (s *Store) Save(originalUrl string, shortCode string) (int, error) {
 	query := `
 			INSERT INTO urls (origianl_url, short_code)
