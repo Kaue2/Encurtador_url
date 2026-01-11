@@ -93,7 +93,7 @@ func (s *Store) Get(code string) (string, error) {
 
 func (s *Store) Save(originalUrl string, shortCode string) (int, error) {
 	query := `
-			INSERT INTO urls (origianl_url, short_code)
+			INSERT INTO urls (original_url, short_code)
 			VALUES ($1, $2)
 			RETURNING id
 	`
