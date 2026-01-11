@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encurtador/internal/api"
 	"encurtador/internal/store"
 	"fmt"
 	"net/http"
@@ -31,12 +32,28 @@ func main()  {
 	}
 	defer storage.Close()
 
+	handler := api.NewHandler(storage)
+
 	fmt.Println("Conexão estabelecida e tabelas criadas")
 
 	// Definindo rota simples
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Encurtador funcionando"))
+	http.HandleFunc("/encurtar", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+			return
+		}
+
+		handler.Create(w, r)
 	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+			return
+		}
+		handler.Redirect(w, r)
+	})
+
 
 	port := ":8080"
 	fmt.Printf("Subindo server...\n")

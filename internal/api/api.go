@@ -36,13 +36,14 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	for i := 0; i < 6; i++ {
-		code := shortener.Generate(6)
+		code = shortener.Generate(6)
+		log.Printf("Código gerado: %s\n", code)
 		_, err = h.store.Save(body.URL, code)
 		if err == nil {
 			break
 		}
 
-		log.Printf("Colisão detectada ou erro de banco: &v. ")
+		log.Printf("Colisão detectada ou erro de banco: %v.", err)
 	}
 
 	if err != nil {
