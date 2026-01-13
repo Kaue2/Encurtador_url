@@ -36,29 +36,17 @@ func main()  {
 
 	fmt.Println("Conexão estabelecida e tabelas criadas")
 
-	// Definindo rota simples
-	http.HandleFunc("/encurtar", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
-			return
-		}
-
-		handler.Create(w, r)
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
-			return
-		}
-		handler.Redirect(w, r)
-	})
-
+	router := handler.RegisterRoutes()
 
 	port := ":8080"
 	fmt.Printf("Subindo server...\n")
 
-	if err := http.ListenAndServe(port, nil); err != nil {
+	server := &http.Server {
+		Addr:  port,
+		Handler: router,
+	}
+
+	if err := server.ListenAndServe(); err != nil {
 		panic(err)
 	}
 }
