@@ -3,6 +3,7 @@ package main
 import (
 	"encurtador/internal/api"
 	"encurtador/internal/store"
+	"encurtador/internal/cache"
 	"fmt"
 	"net/http"
 	"os"
@@ -31,7 +32,15 @@ func main()  {
 		log.Fatalf("Erro: falha ao conectar no banco: %v", err)
 	}
 	defer storage.Close()
+	fmt.Println("Postgres conectado")
 
+	redisClient, err := cache.NewCache("localhost:6379")
+	if err != nil {
+		log.Fatalf("Erro: falha ao conectar com o redis: %v", err)
+	}
+	defer redisClient.Close()
+	fmt.Println("Redis conectado")
+	
 	handler := api.NewHandler(storage)
 
 	fmt.Println("Conexão estabelecida e tabelas criadas")
