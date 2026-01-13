@@ -33,6 +33,27 @@ func NewCache(addr string) (*Cache, error) {
 	return &Cache{client: client}, nil 
 }
 
+func (c *Cache) Get(ctx context.Context, code string) (string, error){
+	val, err := c.client.Get(ctx, code).Result()
+
+	if err == redis.Nil {
+		return "", fmt.Errorf("chave não encontrada")
+	}
+
+	if err  != nil {
+		return "", err
+	}
+
+	return val, nil
+}
+
+func (c *Cache) Save(ctx context.Context, 
+					code string, 
+					originalUrl string, 
+					ttl time.Duration) error {
+	return c.client.Set(ctx, code, originalUrl, ttl).Err()
+} 
+
 func (c *Cache) Close() error {
 	return c.client.Close()
 }

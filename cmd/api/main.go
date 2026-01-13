@@ -31,7 +31,7 @@ func main()  {
 	if err != nil {
 		log.Fatalf("Erro: falha ao conectar no banco: %v", err)
 	}
-	defer storage.Close()
+	defer storage.Close() // agenda a liberação desse objeto na memória
 	fmt.Println("Postgres conectado")
 
 	redisClient, err := cache.NewCache("localhost:6379")
