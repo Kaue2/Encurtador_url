@@ -1,11 +1,14 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"encurtador/internal/cache"
 	"encurtador/internal/shortener"
 	"encurtador/internal/store"
 	"log"
 	"net/http"
+	"time"
 )
 
 type RequestBody struct {
@@ -19,6 +22,7 @@ type ResponseBody struct {
 
 type Handler struct {
 	store *store.Store
+	cache *cache.Cache
 }
 
 func NewHandler(s *store.Store) *Handler {
@@ -64,11 +68,23 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Path[1:]
 
+	urlCache, err := h.cache.Get(r.Context(), code)
+	if err == nil {
+		http.Redirect(w, r, urlCache, http.StatusFound)
+		return 
+	}
+
+	log.Println("Cache MISS: " + code)
+
 	url, err := h.store.Get(code)
 	if err != nil {
 		http.Error(w, "Erro: URL não encontrada", http.StatusNotFound)
 		return
 	} 
+
+	go func() {
+		_ = h.cache.Save(context.Background(), code, url, 24*time.Hour)
+	}()
 	
 	http.Redirect(w, r, url, http.StatusFound)
 }
