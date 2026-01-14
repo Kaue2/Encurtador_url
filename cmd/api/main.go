@@ -17,13 +17,29 @@ func main()  {
 		log.Println("Aviso: não foi encontrado um arquivo .env")
 	}
 
-	// Construindo a string de conexão
-	user := os.Getenv("POSTGRES_USER")
-	password := os.Getenv("POSTGRES_PASSWORD")
-	db := "encurtador"
-	host := "localhost"
+	dbHost := os.Getenv("DB_HOST")
+    if dbHost == "" {
+        dbHost = "localhost" // Fallback para rodar fora do docker
+    }
+    
+    dbPort := os.Getenv("DB_PORT")
+    if dbPort == "" {
+        dbPort = "5432"
+    }
+    
+    // Redis Host também
+    redisHost := os.Getenv("REDIS_HOST")
+    if redisHost == "" {
+        redisHost = "localhost:6379"
+    }
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:5432/%s", user, password, host, db)
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+        os.Getenv("POSTGRES_USER"),
+        os.Getenv("POSTGRES_PASSWORD"),
+        dbHost,
+        dbPort,
+        os.Getenv("POSTGRES_DB"),
+    )
 	fmt.Printf("String de conexão: %s\n", connStr)
 
 	// Criando um storage
@@ -34,7 +50,7 @@ func main()  {
 	defer storage.Close() // agenda a liberação desse objeto na memória
 	fmt.Println("Postgres conectado")
 
-	redisClient, err := cache.NewCache("localhost:6379")
+	redisClient, err := cache.NewCache(redisHost)
 	if err != nil {
 		log.Fatalf("Erro: falha ao conectar com o redis: %v", err)
 	}
