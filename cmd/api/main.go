@@ -41,7 +41,7 @@ func main()  {
 	defer redisClient.Close()
 	fmt.Println("Redis conectado")
 	
-	handler := api.NewHandler(storage)
+	handler := api.NewHandler(storage, redisClient)
 
 	fmt.Println("Conexão estabelecida e tabelas criadas")
 

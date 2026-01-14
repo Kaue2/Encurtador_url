@@ -25,8 +25,8 @@ type Handler struct {
 	cache *cache.Cache
 }
 
-func NewHandler(s *store.Store) *Handler {
-	return &Handler{store: s}
+func NewHandler(s *store.Store, c *cache.Cache) *Handler {
+	return &Handler{store: s, cache: c}
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
