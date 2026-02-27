@@ -32,6 +32,6 @@ Antes de começar, você vai precisar ter instalado em sua máquina as seguintes
 ### 1. Clonando o repositório
 
 ```bash
-git clone [https://github.com/Kaue2/Encurtador_url.git](https://github.com/Kaue2/Encurtador_url.git)
+git clone https://github.com/Kaue2/Encurtador_url.git
 cd Encurtador_url
 ```
